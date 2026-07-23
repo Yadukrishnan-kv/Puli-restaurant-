@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/Favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PULI Menu Admin</title>
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('puli-menu-admin');
+          if (!raw) return;
+          var data = JSON.parse(raw);
+          var mode = data?.state?.settings?.theme_mode;
+          if (mode === 'dark') document.documentElement.dataset.theme = 'dark';
+          else if (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

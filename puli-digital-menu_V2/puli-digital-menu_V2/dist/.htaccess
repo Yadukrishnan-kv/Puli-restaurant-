@@ -1,0 +1,12 @@
+# Serve index.html for the root URL
+DirectoryIndex index.html
+
+# SPA: serve index.html for all routes so React Router works (no 404 on refresh / direct link)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
