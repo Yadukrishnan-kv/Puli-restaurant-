@@ -24,8 +24,9 @@ import {
   LogOut,
 } from 'lucide-react'
 
-const LOGO_LIGHT_THEME = '/assets/Logo_EN.svg'
-const LOGO_DARK_THEME = '/assets/Logo_lgt_EN.svg'
+const BASE = ((import.meta.env.BASE_URL as string) || '/').replace(/\/$/, '')
+const LOGO_LIGHT_THEME = `${BASE}/assets/Logo_EN.svg`
+const LOGO_DARK_THEME = `${BASE}/assets/Logo_lgt_EN.svg`
 
 function useEffectiveTheme(): 'light' | 'dark' {
   const themeMode = useStore((s) => s.settings.theme_mode)

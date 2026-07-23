@@ -47,7 +47,7 @@ function extractObject<T>(payload: unknown): T {
 function toAbsoluteAssetUrl(url: string | undefined | null): string {
   if (!url) return ''
   if (ABSOLUTE_URL_REGEX.test(url) || url.startsWith('data:')) return url
-  if (url.startsWith('/assets/')) return url
+  if (url.startsWith('/assets/')) return `${APP_BASE_PATH}${url}`
 
   const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL
   const path = url.startsWith('/') ? url : `/${url}`

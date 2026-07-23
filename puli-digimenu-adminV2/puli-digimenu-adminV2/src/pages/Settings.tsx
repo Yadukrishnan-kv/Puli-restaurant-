@@ -21,6 +21,8 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+const BASE = ((import.meta.env.BASE_URL as string) || '/').replace(/\/$/, '')
+
 export function SettingsPage() {
   const { settings, setSettings, exportData, importData } = useStore()
   const toast = useToast()
@@ -147,7 +149,7 @@ export function SettingsPage() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                onClick={() => setSettings({ logo_url: '/assets/Logo_lgt_EN.svg' })}
+                onClick={() => setSettings({ logo_url: `${BASE}/assets/Logo_lgt_EN.svg` })}
               >
                 Use default (EN)
               </Button>
@@ -155,7 +157,7 @@ export function SettingsPage() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                onClick={() => setSettings({ logo_url: '/assets/Logo_lgt_AR.svg' })}
+                onClick={() => setSettings({ logo_url: `${BASE}/assets/Logo_lgt_AR.svg` })}
               >
                 Use default (AR)
               </Button>
@@ -204,7 +206,7 @@ export function SettingsPage() {
               variant="secondary"
               size="sm"
               className="mt-2"
-              onClick={() => setSettings({ favicon_url: '/assets/Favicon.svg' })}
+              onClick={() => setSettings({ favicon_url: `${BASE}/assets/Favicon.svg` })}
             >
               Use default favicon
             </Button>
