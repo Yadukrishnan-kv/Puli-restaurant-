@@ -88,16 +88,6 @@ export function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-text-secondary)] text-center">
-              Demo credentials from .env:
-              <br />
-              <code className="block mt-2 font-mono bg-[var(--color-background-primary)] p-2 rounded text-[var(--color-text-primary)]">
-                admin@puli.com / Admin123456!
-              </code>
-            </p>
-          </div>
         </div>
       </div>
     </div>
