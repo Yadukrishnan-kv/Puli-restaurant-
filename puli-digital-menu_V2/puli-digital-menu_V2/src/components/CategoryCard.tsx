@@ -35,7 +35,7 @@ export const CategoryCard: React.FC<Props> = ({ category, index }) => {
           style={{
             backgroundImage: category.image_url
               ? `url('${category.image_url}')`
-              : "url('https://images.pexels.com/photos/958546/pexels-photo-958546.jpeg?auto=compress&cs=tinysrgb&w=800')",
+              : undefined,
           }}
         >
           {/* image only, no overlay text */}

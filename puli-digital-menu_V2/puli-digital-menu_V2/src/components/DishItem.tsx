@@ -161,7 +161,7 @@ export const DishItem: React.FC<Props> = ({ item, onOpen, index, resolvedCountry
           style={{
             backgroundImage: item.image_url
               ? `url('${item.image_url}')`
-              : "url('https://images.pexels.com/photos/958546/pexels-photo-958546.jpeg?auto=compress&cs=tinysrgb&w=600')",
+              : undefined,
           }}
         />
         <div className="dish-item__content">

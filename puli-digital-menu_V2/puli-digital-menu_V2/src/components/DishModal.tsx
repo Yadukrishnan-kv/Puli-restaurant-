@@ -20,7 +20,6 @@ const SPICE_LABELS: Record<number, string> = {
 
 const MODAL_BAR_BG = "#1e3a5f";
 const MODAL_TAB_ACTIVE_BG = "#1e3a5f";
-const FALLBACK_DISH_IMAGE = "https://images.pexels.com/photos/958546/pexels-photo-958546.jpeg?auto=compress&cs=tinysrgb&w=1200";
 
 function formatTagLabel(tag: string): string {
   return tag
@@ -132,7 +131,7 @@ export const DishModal: React.FC<Props> = ({ item, onClose, category }) => {
       ] as Array<[string, { label: string; icon: "chefSignature" | null }]>,
     ).values(),
   );
-  const dishImage = item.image_url || FALLBACK_DISH_IMAGE;
+  const dishImage = item.image_url;
 
   return (
     <AnimatePresence>
@@ -162,7 +161,7 @@ export const DishModal: React.FC<Props> = ({ item, onClose, category }) => {
             <div
               className="dish-modal__image"
               style={{
-                backgroundImage: `url('${dishImage}')`,
+                backgroundImage: dishImage ? `url('${dishImage}')` : undefined,
               }}
             />
           </div>
