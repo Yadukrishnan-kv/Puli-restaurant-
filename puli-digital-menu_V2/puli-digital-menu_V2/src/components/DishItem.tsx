@@ -6,6 +6,8 @@ import { getCountryCodeForItem } from "@/lib/dataConverters";
 import { AppIcon, getDietaryIconName } from "./AppIcon";
 import { IconWithTooltip } from "./IconWithTooltip";
 
+const DEFAULT_DISH_IMAGE = "/uploads/menu-items/no-image-available-icon-vector.jpg";
+
 const COUNTRY_CODE_TO_I18N: Record<string, string> = {
   IN: "india",
   JP: "japan",
@@ -159,9 +161,7 @@ export const DishItem: React.FC<Props> = ({ item, onOpen, index, resolvedCountry
         <div
           className="dish-item__image"
           style={{
-            backgroundImage: item.image_url
-              ? `url('${item.image_url}')`
-              : undefined,
+            backgroundImage: `url('${item.image_url || DEFAULT_DISH_IMAGE}')`,
           }}
         />
         <div className="dish-item__content">

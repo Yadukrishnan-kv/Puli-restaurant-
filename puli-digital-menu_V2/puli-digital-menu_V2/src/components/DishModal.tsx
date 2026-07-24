@@ -6,6 +6,8 @@ import { getCountryCodeForItem, isVegetarianSection, countryCodeToFlag } from "@
 import { AppIcon, getDietaryIconName } from "./AppIcon";
 import type { DietaryTag } from "../types/filters";
 
+const DEFAULT_DISH_IMAGE = "/uploads/menu-items/no-image-available-icon-vector.jpg";
+
 const COUNTRY_CODE_TO_I18N: Record<string, string> = {
   IN: "india", JP: "japan", TH: "thailand", CN: "china", KR: "southKorea",
   LB: "lebanon", VN: "vietnam", MY: "malaysia", ID: "indonesia", SG: "singapore", SA: "countrySA",
@@ -161,7 +163,7 @@ export const DishModal: React.FC<Props> = ({ item, onClose, category }) => {
             <div
               className="dish-modal__image"
               style={{
-                backgroundImage: dishImage ? `url('${dishImage}')` : undefined,
+                backgroundImage: `url('${dishImage || DEFAULT_DISH_IMAGE}')`,
               }}
             />
           </div>

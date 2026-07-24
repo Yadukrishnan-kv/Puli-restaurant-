@@ -292,7 +292,7 @@ import { apiClient } from './api/client';
 
 async function handleLogin() {
   try {
-    const response = await apiClient.login('admin@puli.com', 'password');
+    const response = await apiClient.login('puliadmin@eazymenu.in', 'password');
     console.log('Logged in:', response.user);
   } catch (error) {
     console.error('Login failed:', error);

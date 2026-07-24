@@ -236,6 +236,8 @@ const saveBase64Image = async (dataUrl, subfolder = '') => {
   return urlPath;
 };
 
+const DEFAULT_DISH_IMAGE = '/uploads/menu-items/no-image-available-icon-vector.jpg';
+
 const makeAbsoluteUrl = (req, url) => {
   if (!url || typeof url !== 'string') return url;
   // If the URL already looks absolute, return as-is
@@ -314,7 +316,7 @@ app.post('/api/menu-sections', authMiddleware, async (req, res) => {
 
 app.put('/api/menu-sections/:id', authMiddleware, async (req, res) => {
   try {
-    const section = await MenuSection.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const section = await MenuSection.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'menu-sections', 'update', section._id, req.body);
     res.json(toPlain(section));
   } catch (error) {
@@ -363,7 +365,7 @@ app.put('/api/categories/:id', authMiddleware, async (req, res) => {
     if (body.image) {
       body.image = await saveBase64Image(body.image, 'categories');
     }
-    const category = await Category.findByIdAndUpdate(req.params.id, body, { new: true });
+    const category = await Category.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'categories', 'update', category._id, body);
     res.json(mapCategoryForAdmin(req, category));
   } catch (error) {
@@ -404,7 +406,7 @@ app.post('/api/subcategories', authMiddleware, async (req, res) => {
 
 app.put('/api/subcategories/:id', authMiddleware, async (req, res) => {
   try {
-    const subcategory = await SubCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const subcategory = await SubCategory.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'subcategories', 'update', subcategory._id, req.body);
     res.json(toPlain(subcategory));
   } catch (error) {
@@ -453,7 +455,7 @@ app.put('/api/countries/:id', authMiddleware, async (req, res) => {
     if (body.flag_image) {
       body.flag_image = await saveBase64Image(body.flag_image, 'countries');
     }
-    const country = await Country.findByIdAndUpdate(req.params.id, body, { new: true });
+    const country = await Country.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'countries', 'update', country._id, body);
     res.json(mapCountryForAdmin(req, country));
   } catch (error) {
@@ -494,7 +496,7 @@ app.post('/api/classifications', authMiddleware, async (req, res) => {
 
 app.put('/api/classifications/:id', authMiddleware, async (req, res) => {
   try {
-    const classification = await Classification.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const classification = await Classification.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'classifications', 'update', classification._id, req.body);
     res.json(toPlain(classification));
   } catch (error) {
@@ -585,7 +587,7 @@ app.put('/api/menu-items/:id', authMiddleware, async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(body, 'country_id')) {
       await attachCountrySnapshot(body);
     }
-    const item = await MenuItem.findByIdAndUpdate(req.params.id, body, { new: true });
+    const item = await MenuItem.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'menu-items', 'update', item._id, body);
     res.json({
       ...toPlain(item),
@@ -630,7 +632,7 @@ app.post('/api/filter-tags', authMiddleware, async (req, res) => {
 
 app.put('/api/filter-tags/:id', authMiddleware, async (req, res) => {
   try {
-    const tag = await FilterTag.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const tag = await FilterTag.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'filter-tags', 'update', tag._id, req.body);
     res.json(toPlain(tag));
   } catch (error) {
@@ -687,7 +689,7 @@ app.put('/api/banner/:id', authMiddleware, async (req, res) => {
       body.background_image = await saveBase64Image(body.background_image, 'banners');
     }
 
-    const banner = await Banner.findByIdAndUpdate(req.params.id, body, { new: true });
+    const banner = await Banner.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'banner', 'update', banner._id, body);
     const plain = toPlain(banner);
     res.json({
@@ -733,7 +735,7 @@ app.put('/api/story/:id', authMiddleware, async (req, res) => {
     if (body.background_image) {
       body.background_image = await saveBase64Image(body.background_image, 'stories');
     }
-    const story = await Story.findByIdAndUpdate(req.params.id, body, { new: true });
+    const story = await Story.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'story', 'update', story._id, body);
     const plain = toPlain(story);
     res.json({
@@ -807,7 +809,7 @@ app.put('/api/settings/:id', authMiddleware, async (req, res) => {
     if (body.favicon_url) {
       body.favicon_url = await saveBase64Image(body.favicon_url, 'settings');
     }
-    const settings = await Settings.findByIdAndUpdate(req.params.id, body, { new: true });
+    const settings = await Settings.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after' });
     await logActivity(req, req.user.email, 'settings', 'update', settings._id, body);
     res.json(toPlain(settings));
   } catch (error) {
@@ -925,7 +927,7 @@ const mapCategoryForPublic = (req, category) => ({
   description_en: category.description_en || category.description || '',
   description_ar: category.description_ar || category.description_en || category.description || '',
   description: category.description_en || category.description_ar || category.description || '',
-  image_url: makeAbsoluteUrl(req, category.image),
+  image_url: makeAbsoluteUrl(req, category.image || DEFAULT_DISH_IMAGE),
   slug: category.slug,
   group: category.group,
   category_id: category.group,
@@ -941,7 +943,7 @@ const mapMenuItemForPublic = (req, item) => ({
   description_en: item.description_en,
   description_ar: item.description_ar,
   price: item.price,
-  image_url: makeAbsoluteUrl(req, item.image),
+  image_url: makeAbsoluteUrl(req, item.image || DEFAULT_DISH_IMAGE),
   calories: item.calories,
   allergens: item.allergens,
   tags: item.tags,

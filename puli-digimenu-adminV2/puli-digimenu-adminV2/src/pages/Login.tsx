@@ -53,7 +53,7 @@ export function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@puli.com"
+                placeholder="puliadmin@eazymenu.in"
                 disabled={loading}
                 className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2.5 text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] disabled:opacity-50"
               />
