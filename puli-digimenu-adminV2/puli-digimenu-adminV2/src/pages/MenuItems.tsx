@@ -23,8 +23,9 @@ import { ImageUpload } from '@/components/forms/ImageUpload'
 import { useStore } from '@/store/useStore'
 import { useToast } from '@/context/ToastContext'
 import { adminAPI } from '@/lib/adminAPI'
-import type { MenuItem as MenuItemType } from '@/types'
+import { resolveMenuHierarchy } from '@/lib/hierarchyResolver'
 import * as XLSX from 'xlsx'
+import type { MenuItem as MenuItemType } from '@/types'
 
 const schema = z.object({
   name_en: z.string().min(1, 'Name (EN) required'),
@@ -134,7 +135,7 @@ function SortableMenuItemRow({
 }
 
 export function MenuItemsPage() {
-  const { categories, subcategories, countries, menuItems, addMenuItem, updateMenuItem, deleteMenuItem, reorderMenuItems } = useStore()
+  const { categories, subcategories, classifications, sections, countries, menuItems, addMenuItem, updateMenuItem, deleteMenuItem, reorderMenuItems } = useStore()
   const toast = useToast()
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -149,6 +150,7 @@ export function MenuItemsPage() {
   const [importColumns, setImportColumns] = useState<string[]>([])
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({})
   const [importing, setImporting] = useState(false)
+  const [importResults, setImportResults] = useState<Array<{ row: number; name: string; status: string; message: string }>>([])
 
   const MENUITEM_FIELDS = [
     { value: '', label: '— Skip column —' },
@@ -159,6 +161,7 @@ export function MenuItemsPage() {
     { value: 'price', label: 'Price *' },
     { value: 'category', label: 'Category (name)' },
     { value: 'subcategory', label: 'Sub-category (name)' },
+    { value: 'section', label: 'Section (Category, Sub-Category, or Section Heading)' },
     { value: 'country', label: 'Country (name)' },
     { value: 'tags', label: 'Tags (comma-separated)' },
     { value: 'calories', label: 'Calories' },
@@ -179,6 +182,8 @@ export function MenuItemsPage() {
     description: 'description_en', 'description(english)': 'description_en',
     'description(arabic)': 'description_ar', 'arabic description': 'description_ar',
     'sub category': 'subcategory', subcategory: 'subcategory', 'sub-category': 'subcategory',
+    section: 'section', 'menu section': 'section', 'section heading': 'section',
+    'menu section heading': 'section',
     calories: 'calories', allergens: 'allergens',
     tags: 'tags', 'dietary tags': 'tags',
     visible: 'visible', 'hide': 'visible', 'show': 'visible',
@@ -246,6 +251,7 @@ export function MenuItemsPage() {
       return
     }
     setImporting(true)
+    const results: Array<{ row: number; name: string; status: string; message: string }> = []
     let success = 0
     let failed = 0
 
@@ -257,26 +263,54 @@ export function MenuItemsPage() {
           mapped[field] = row[col] ?? ''
         }
 
-        let categoryId = ''
-        let subcategoryId = ''
+        if (!mapped.name_en) {
+          failed++
+          results.push({ row: i + 2, name: String(row[importColumns[0]] ?? ''), status: 'Failed', message: 'Name (EN) is empty' })
+          continue
+        }
+
+        const categoryValue = mapped.category ? String(mapped.category) : undefined
+        const subCategoryValue = mapped.subcategory ? String(mapped.subcategory) : undefined
+        const sectionValue = mapped.section ? String(mapped.section) : undefined
+
+        // Collect values from unmapped columns for extra hierarchy matching
+        const extraValues: string[] = []
+        for (const col of importColumns) {
+          const field = columnMapping[col]
+          if (!field) {
+            const val = row[col]
+            if (val && String(val).trim()) {
+              extraValues.push(String(val))
+            }
+          }
+        }
+
+        const hierarchyResult = resolveMenuHierarchy({
+          categoryValue,
+          subCategoryValue,
+          sectionValue,
+          extraValues,
+          categories,
+          subCategories: subcategories,
+          classifications,
+          menuSections: sections,
+        })
+
+        if (!hierarchyResult.success) {
+          failed++
+          const productName = String(mapped.name_en ?? '').trim()
+          results.push({ row: i + 2, name: productName, status: 'Skipped', message: hierarchyResult.message })
+          continue
+        }
+
+        if (!hierarchyResult.categoryId) {
+          failed++
+          const productName = String(mapped.name_en ?? '').trim()
+          results.push({ row: i + 2, name: productName, status: 'Skipped', message: 'No valid category could be resolved for this item' })
+          continue
+        }
+
         let countryId: string | null = null
-
-        if (mapped.category) {
-          const cat = categories.find((c) => c.name_en.toLowerCase() === String(mapped.category).trim().toLowerCase())
-          if (cat) categoryId = cat.id
-        }
-        if (!categoryId && categories.length > 0) categoryId = categories[0].id
-
-        if (mapped.subcategory) {
-          const subs = subcategories.filter((s) => s.category_id === categoryId)
-          const sub = subs.find((s) => s.name_en.toLowerCase() === String(mapped.subcategory).trim().toLowerCase())
-          if (sub) subcategoryId = sub.id
-        }
-        if (!subcategoryId) {
-          const fallbackSubs = subcategories.filter((s) => s.category_id === categoryId).sort((a, b) => a.order - b.order)
-          if (fallbackSubs.length > 0) subcategoryId = fallbackSubs[0].id
-        }
-
         if (mapped.country) {
           const co = countries.find((c) => c.name_en.toLowerCase() === String(mapped.country).trim().toLowerCase())
           if (co) countryId = co.id
@@ -296,9 +330,9 @@ export function MenuItemsPage() {
           description_en: String(mapped.description_en ?? '').trim(),
           description_ar: String(mapped.description_ar ?? '').trim(),
           price,
-          category_id: categoryId,
-          subcategory_id: subcategoryId || null,
-          classification_id: null,
+          category_id: hierarchyResult.categoryId,
+          subcategory_id: hierarchyResult.subCategoryId,
+          classification_id: hierarchyResult.classificationId,
           country_id: countryId,
           image: String(mapped.image ?? ''),
           tags,
@@ -311,25 +345,23 @@ export function MenuItemsPage() {
           available_from: String(mapped.available_from ?? '').trim() || null,
           available_to: String(mapped.available_to ?? '').trim() || null,
           available_days: availableDays,
-          order: menuItems.filter((m) => m.category_id === categoryId).length + i,
-        }
-
-        if (!payload.name_en) {
-          failed++
-          continue
+          order: menuItems.filter((m) => m.category_id === hierarchyResult.categoryId).length + i,
         }
 
         const created = await adminAPI.createMenuItem(payload)
         addMenuItem(created)
         success++
+        results.push({ row: i + 2, name: String(payload.name_en), status: 'Imported', message: hierarchyResult.matchedBy ? `Matched via ${hierarchyResult.matchedBy}` : 'Valid' })
       } catch {
         failed++
+        results.push({ row: i + 2, name: String(row[importColumns[0]] ?? ''), status: 'Failed', message: 'API error' })
       }
     }
 
+    setImportResults(results)
     setImportModalOpen(false)
     setImporting(false)
-    toast(`Imported: ${success} items${failed > 0 ? `, Failed: ${failed}` : ''}`, failed > 0 ? 'error' : undefined)
+    toast(`Imported: ${success} items${failed > 0 ? `, Skipped/Failed: ${failed}` : ''}`, failed > 0 ? 'error' : undefined)
   }
 
   const getCatName = (id: string) => categories.find((c) => c.id === id)?.name_en ?? '–'
@@ -965,6 +997,45 @@ export function MenuItemsPage() {
               </table>
             </div>
           </details>
+          {importResults.length > 0 && (
+            <div className="mt-4">
+              <details open className="mt-2">
+                <summary className="cursor-pointer text-sm font-medium text-[var(--color-text-secondary)]">
+                  Import Results: {importResults.filter((r) => r.status === 'Imported').length} imported, {importResults.filter((r) => r.status !== 'Imported').length} skipped/failed
+                </summary>
+                <div className="mt-2 overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-[var(--color-border)]">
+                        <th className="px-2 py-1 text-left font-medium text-[var(--color-text-secondary)]">Row</th>
+                        <th className="px-2 py-1 text-left font-medium text-[var(--color-text-secondary)]">Product</th>
+                        <th className="px-2 py-1 text-left font-medium text-[var(--color-text-secondary)]">Status</th>
+                        <th className="px-2 py-1 text-left font-medium text-[var(--color-text-secondary)]">Message</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importResults.map((r, ri) => (
+                        <tr key={ri} className="border-b border-[var(--color-border)]">
+                          <td className="px-2 py-1 text-[var(--color-text-primary)]">{r.row}</td>
+                          <td className="px-2 py-1 text-[var(--color-text-primary)]">{r.name}</td>
+                          <td className="px-2 py-1">
+                            {r.status === 'Imported' ? (
+                              <span className="text-emerald-600">{r.status}</span>
+                            ) : r.status === 'Skipped' ? (
+                              <span className="text-amber-600">{r.status}</span>
+                            ) : (
+                              <span className="text-red-600">{r.status}</span>
+                            )}
+                          </td>
+                          <td className="px-2 py-1 text-[var(--color-text-secondary)]">{r.message}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+          )}
         </div>
       </Modal>
     </>
