@@ -89,9 +89,14 @@ export interface SettingsData {
   restaurant_name_ar?: string
   address_en?: string
   address_ar?: string
+  phone?: string
+  telephone?: string
+  email?: string
   logo_url?: string
   logo_dark_url?: string
   logo_light_url?: string
+  logo_dark_ar_url?: string
+  logo_light_ar_url?: string
   favicon_url?: string
   theme_mode?: string
 }
@@ -279,15 +284,17 @@ class CustomerAPIClient {
   /**
    * Get app settings (logo / menu title / theme)
    */
-  async getSettings(): Promise<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; favicon_url?: string; theme_mode?: string }> {
+  async getSettings(): Promise<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; logo_dark_ar_url?: string; logo_light_ar_url?: string; favicon_url?: string; theme_mode?: string }> {
     const response = await this.client.get<unknown>('/api/settings')
-    const settings = extractObject<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; favicon_url?: string; theme_mode?: string }>(response.data)
+    const settings = extractObject<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; logo_dark_ar_url?: string; logo_light_ar_url?: string; favicon_url?: string; theme_mode?: string }>(response.data)
 
     return {
       ...settings,
       logo_url: toAbsoluteAssetUrl(settings.logo_url),
       logo_dark_url: toAbsoluteAssetUrl(settings.logo_dark_url),
       logo_light_url: toAbsoluteAssetUrl(settings.logo_light_url),
+      logo_dark_ar_url: toAbsoluteAssetUrl(settings.logo_dark_ar_url),
+      logo_light_ar_url: toAbsoluteAssetUrl(settings.logo_light_ar_url),
       favicon_url: toAbsoluteAssetUrl(settings.favicon_url),
     }
   }

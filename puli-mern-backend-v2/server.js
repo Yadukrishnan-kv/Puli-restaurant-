@@ -85,6 +85,20 @@ const normalizeTagToken = (value) => String(value || '')
   .replace(/&/g, ' and ')
   .replace(/[^a-z0-9]+/g, '');
 
+// Coerce an incoming price to a non-negative number.
+// Blank / null / non-numeric / negative values become 0, which the customer
+// menu renders as "As Per Size".
+const normalizeMenuItemPrice = (body) => {
+  if (!Object.prototype.hasOwnProperty.call(body, 'price')) return;
+  const raw = body.price;
+  if (raw === '' || raw === null || raw === undefined) {
+    body.price = 0;
+    return;
+  }
+  const num = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/[^0-9.]/g, ''));
+  body.price = Number.isFinite(num) && num > 0 ? num : 0;
+};
+
 const normalizeMenuItemTags = (body) => {
   const tagList = Array.isArray(body.tags)
     ? body.tags.map((tag) => String(tag || '').trim()).filter(Boolean)
@@ -561,6 +575,7 @@ app.post('/api/menu-items', authMiddleware, async (req, res) => {
       body.image = await saveBase64Image(body.image, 'menu-items');
     }
     normalizeMenuItemTags(body);
+    normalizeMenuItemPrice(body);
     await attachCountrySnapshot(body);
     const item = await MenuItem.create(body);
     await logActivity(req, req.user.email, 'menu-items', 'create', item._id, item);
@@ -584,6 +599,7 @@ app.put('/api/menu-items/:id', authMiddleware, async (req, res) => {
       body.image = await saveBase64Image(body.image, 'menu-items');
     }
     normalizeMenuItemTags(body);
+    normalizeMenuItemPrice(body);
     if (Object.prototype.hasOwnProperty.call(body, 'country_id')) {
       await attachCountrySnapshot(body);
     }
@@ -783,9 +799,14 @@ app.get('/api/settings', async (req, res) => {
       restaurant_name_ar: settings.restaurant_name_ar,
       address_en: settings.address_en,
       address_ar: settings.address_ar,
+      phone: settings.phone,
+      telephone: settings.telephone,
+      email: settings.email,
       logo_url: makeAbsoluteUrl(req, settings.logo_url),
       logo_dark_url: makeAbsoluteUrl(req, settings.logo_dark_url),
       logo_light_url: makeAbsoluteUrl(req, settings.logo_light_url),
+      logo_dark_ar_url: makeAbsoluteUrl(req, settings.logo_dark_ar_url),
+      logo_light_ar_url: makeAbsoluteUrl(req, settings.logo_light_ar_url),
       favicon_url: makeAbsoluteUrl(req, settings.favicon_url),
       theme_mode: settings.theme_mode,
     });
@@ -805,6 +826,12 @@ app.put('/api/settings/:id', authMiddleware, async (req, res) => {
     }
     if (body.logo_light_url) {
       body.logo_light_url = await saveBase64Image(body.logo_light_url, 'settings');
+    }
+    if (body.logo_dark_ar_url) {
+      body.logo_dark_ar_url = await saveBase64Image(body.logo_dark_ar_url, 'settings');
+    }
+    if (body.logo_light_ar_url) {
+      body.logo_light_ar_url = await saveBase64Image(body.logo_light_ar_url, 'settings');
     }
     if (body.favicon_url) {
       body.favicon_url = await saveBase64Image(body.favicon_url, 'settings');
@@ -942,7 +969,7 @@ const mapMenuItemForPublic = (req, item) => ({
   name_ar: item.name_ar,
   description_en: item.description_en,
   description_ar: item.description_ar,
-  price: item.price,
+  price: Number.isFinite(item.price) ? item.price : 0,
   image_url: makeAbsoluteUrl(req, item.image || DEFAULT_DISH_IMAGE),
   calories: item.calories,
   allergens: item.allergens,

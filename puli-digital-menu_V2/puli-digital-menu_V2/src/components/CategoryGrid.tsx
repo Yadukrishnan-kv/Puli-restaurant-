@@ -34,6 +34,12 @@ export const CategoryGrid: React.FC = () => {
     );
   }
 
+  // Contact details from admin settings, falling back to defaults.
+  const phone = settings?.phone || "+966 593 332 904";
+  const telephone = settings?.telephone || "+966 133 615 222";
+  const email = settings?.email || "info@puli.rest";
+  const telHref = (value: string) => `tel:${value.replace(/[^\d+]/g, "")}`;
+
   const mainCategories = categories.filter((c) => c.category_id !== 'special' && c.category_id !== 'festive');
   const specialCategories = categories.filter((c) => c.category_id === 'special');
   const festiveCategories = categories.filter((c) => c.category_id === 'festive');
@@ -126,25 +132,37 @@ export const CategoryGrid: React.FC = () => {
                 }}
               >
                 <div style={{ fontWeight: 600 }}>{t("openingHours")}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", columnGap: "0.6rem", rowGap: "0.1rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                   {[
-                    ["Monday",    "7–11 am, 11:30 am–11:30 pm"],
-                    ["Tuesday",   "7–11 am, 11:30 am–11:30 pm"],
-                    ["Wednesday", "7–11 am, 11:30 am–11:30 pm"],
-                    ["Thursday",  "7–11 am, 11:30 am–12 am"],
-                    ["Friday",    "7–11 am, 11:30 am–12 am"],
-                    ["Saturday",  "7–11 am, 11:30 am–11:30 pm"],
-                    ["Sunday",    "7–11 am, 11:30 am–11:30 pm"],
-                  ].map(([day, hours]) => (
-                    <>
-                      <span key={day + "-day"} style={{ fontWeight: 500 }}>{day}</span>
-                      <span key={day + "-hours"}>{hours}</span>
-                    </>
+                    {
+                      days: "FRIDAY & SATURDAY",
+                      meals: [
+                        "Breakfast: 7.00am to 10.00am",
+                        "Lunch: 11.30am to 3.30pm",
+                        "Chaat: 4.00pm to 6.00pm",
+                        "Dinner: 6.00pm to 11.45pm",
+                      ],
+                    },
+                    {
+                      days: "SUNDAY TO THURSDAY",
+                      meals: [
+                        "Lunch: 11.30am to 3.30pm",
+                        "Chaat: 4.00pm to 6.00pm",
+                        "Dinner: 6.00pm to 11.45pm",
+                      ],
+                    },
+                  ].map(({ days, meals }) => (
+                    <div key={days} style={{ display: "flex", flexDirection: "column", gap: "0.1rem" }}>
+                      <span style={{ fontWeight: 600 }}>{days}</span>
+                      {meals.map((meal) => (
+                        <span key={meal}>{meal}</span>
+                      ))}
+                    </div>
                   ))}
                 </div>
                 <div style={{ fontWeight: 600, marginTop: "0.6rem" }}>{t("website")}</div>
-                <a href="https://www.sayosaudi.com" target="_blank" rel="noreferrer">
-                  www.sayosaudi.com
+                <a href="https://www.puli.rest" target="_blank" rel="noreferrer">
+                  www.puli.rest
                 </a>
               </div>
               <div
@@ -158,8 +176,11 @@ export const CategoryGrid: React.FC = () => {
                 <div style={{ whiteSpace: "pre-line" }}>
                   {(isArabic ? settings?.address_ar : settings?.address_en) || settings?.address_en || settings?.address_ar || t("defaultAddress")}
                 </div>
-                <div style={{ fontWeight: 600, marginTop: "0.6rem" }}>{t("otherLocations")}</div>
-                <a href="#">{t("viewMoreLocations")}</a>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.1rem", marginTop: "0.6rem" }}>
+                  {phone && <a href={telHref(phone)} dir="ltr">Mob: {phone}</a>}
+                  {telephone && <a href={telHref(telephone)} dir="ltr">Tel: {telephone}</a>}
+                  {email && <a href={`mailto:${email}`} dir="ltr">{email}</a>}
+                </div>
               </div>
             </div>
             <div

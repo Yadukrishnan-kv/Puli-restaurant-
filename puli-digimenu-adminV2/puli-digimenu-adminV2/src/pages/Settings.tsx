@@ -16,6 +16,9 @@ const schema = z.object({
   restaurant_name_ar: z.string().optional(),
   address_en: z.string().optional(),
   address_ar: z.string().optional(),
+  phone: z.string().optional(),
+  telephone: z.string().optional(),
+  email: z.string().optional(),
   theme_mode: z.enum(['light', 'dark', 'system']),
 })
 
@@ -38,6 +41,9 @@ export function SettingsPage() {
       restaurant_name_ar: settings.restaurant_name_ar || '',
       address_en: settings.address_en || '',
       address_ar: settings.address_ar || '',
+      phone: settings.phone || '',
+      telephone: settings.telephone || '',
+      email: settings.email || '',
       theme_mode: settings.theme_mode,
     },
   })
@@ -50,6 +56,8 @@ export function SettingsPage() {
         logo_url: settings.logo_url,
         logo_dark_url: settings.logo_dark_url || '',
         logo_light_url: settings.logo_light_url || '',
+        logo_dark_ar_url: settings.logo_dark_ar_url || '',
+        logo_light_ar_url: settings.logo_light_ar_url || '',
         favicon_url: settings.favicon_url,
       }
       const updated = id ? await adminAPI.updateSettings(id, payload) : await adminAPI.getSettings()
@@ -134,6 +142,42 @@ export function SettingsPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
+              Phone (Mobile)
+            </label>
+            <input
+              {...register('phone')}
+              type="tel"
+              dir="ltr"
+              placeholder="+966 593 332 904"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
+              Telephone (Landline)
+            </label>
+            <input
+              {...register('telephone')}
+              type="tel"
+              dir="ltr"
+              placeholder="+966 133 615 222"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
+              Email
+            </label>
+            <input
+              {...register('email')}
+              type="email"
+              dir="ltr"
+              placeholder="info@puli.rest"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
               Logo
             </label>
             <p className="mb-2 text-xs text-[var(--color-text-secondary)]">
@@ -165,10 +209,10 @@ export function SettingsPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
-              Logo for Light Mode (dark logo)
+              English Logo for Light Mode (dark logo)
             </label>
             <p className="mb-2 text-xs text-[var(--color-text-secondary)]">
-              Shown when website theme is light.
+              Shown on the English site when website theme is light.
             </p>
             <ImageUpload
               value={settings.logo_dark_url || ''}
@@ -178,15 +222,41 @@ export function SettingsPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
-              Logo for Dark Mode (light logo)
+              English Logo for Dark Mode (light logo)
             </label>
             <p className="mb-2 text-xs text-[var(--color-text-secondary)]">
-              Shown when website theme is dark.
+              Shown on the English site when website theme is dark.
             </p>
             <ImageUpload
               value={settings.logo_light_url || ''}
               onChange={(url) => setSettings({ logo_light_url: url })}
               placeholder="Upload light logo for dark mode"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
+              Arabic Logo for Light Mode (dark logo)
+            </label>
+            <p className="mb-2 text-xs text-[var(--color-text-secondary)]">
+              Shown on the Arabic site when website theme is light. Falls back to the English logo if empty.
+            </p>
+            <ImageUpload
+              value={settings.logo_dark_ar_url || ''}
+              onChange={(url) => setSettings({ logo_dark_ar_url: url })}
+              placeholder="Upload Arabic dark logo for light mode"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)]">
+              Arabic Logo for Dark Mode (light logo)
+            </label>
+            <p className="mb-2 text-xs text-[var(--color-text-secondary)]">
+              Shown on the Arabic site when website theme is dark. Falls back to the English logo if empty.
+            </p>
+            <ImageUpload
+              value={settings.logo_light_ar_url || ''}
+              onChange={(url) => setSettings({ logo_light_ar_url: url })}
+              placeholder="Upload Arabic light logo for dark mode"
             />
           </div>
           <div>

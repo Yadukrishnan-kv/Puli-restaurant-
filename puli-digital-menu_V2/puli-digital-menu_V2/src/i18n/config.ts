@@ -77,6 +77,7 @@ const resources = {
       detailCalories: "Calories",
       detailAllergens: "Allergens",
       detailPrice: "Price",
+      asPerSize: "As Per Size",
       detailHighlight: "Highlight",
       footerRights: "© {{year}} {{restaurant}}. All rights reserved.",
       menus: "Menus",
@@ -87,7 +88,7 @@ const resources = {
       phone: "Phone",
       website: "Website",
       address: "Address",
-      defaultAddress: "Al Fanater District,\nJubail, Saudi Arabia",
+      defaultAddress: "P.O. Box: 7245, Al Jubail 35514, KSA\nIntersection Prince Mashhoor St. & Prince Metib St",
       otherLocations: "Other Locations",
       viewMoreLocations: "View more PULI locations",
       calorieNotice:
@@ -169,6 +170,7 @@ const resources = {
       detailCalories: "السعرات",
       detailAllergens: "مسببات الحساسية",
       detailPrice: "السعر",
+      asPerSize: "حسب الحجم",
       detailHighlight: "مميز",
       footerRights: "© {{year}} {{restaurant}}. جميع الحقوق محفوظة.",
       menus: "قوائم الطعام",
@@ -179,7 +181,7 @@ const resources = {
       phone: "الهاتف",
       website: "الموقع الإلكتروني",
       address: "العنوان",
-      defaultAddress: "حي الفناتير،\nالجبيل، المملكة العربية السعودية",
+      defaultAddress: "ص.ب: 7245، الجبيل 35514، المملكة العربية السعودية\nتقاطع شارع الأمير مشهور وشارع الأمير متعب",
       otherLocations: "فروع أخرى",
       viewMoreLocations: "عرض المزيد من فروع سايو",
       calorieNotice:

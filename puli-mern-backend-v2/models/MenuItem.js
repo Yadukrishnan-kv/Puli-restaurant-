@@ -17,9 +17,12 @@ const MenuItemSchema = new mongoose.Schema(
     description_ar: String,
 
     // Pricing
+    // Optional: a value of 0 (or blank on creation) means the price is not fixed
+    // and the customer menu displays "As Per Size" instead of a number.
     price: {
       type: Number,
-      required: true,
+      default: 0,
+      min: 0,
     },
 
     // Media

@@ -365,6 +365,8 @@ class AdminAPIClient {
       logo_url: toAbsoluteAssetUrl(settings.logo_url),
       logo_dark_url: toAbsoluteAssetUrl(settings.logo_dark_url),
       logo_light_url: toAbsoluteAssetUrl(settings.logo_light_url),
+      logo_dark_ar_url: toAbsoluteAssetUrl(settings.logo_dark_ar_url),
+      logo_light_ar_url: toAbsoluteAssetUrl(settings.logo_light_ar_url),
       favicon_url: toAbsoluteAssetUrl(settings.favicon_url),
     }
   }
@@ -376,6 +378,8 @@ class AdminAPIClient {
       logo_url: toAbsoluteAssetUrl(response.data.logo_url),
       logo_dark_url: toAbsoluteAssetUrl(response.data.logo_dark_url),
       logo_light_url: toAbsoluteAssetUrl(response.data.logo_light_url),
+      logo_dark_ar_url: toAbsoluteAssetUrl(response.data.logo_dark_ar_url),
+      logo_light_ar_url: toAbsoluteAssetUrl(response.data.logo_light_ar_url),
       favicon_url: toAbsoluteAssetUrl(response.data.favicon_url),
     }
   }

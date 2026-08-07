@@ -15,7 +15,10 @@ export const Footer: React.FC = () => {
     theme === "light"
       ? "/assets/Logo_EN.svg"
       : "/assets/Logo_lgt_EN.svg";
-  const themeLogo = theme === "light" ? settings?.logo_dark_url : settings?.logo_light_url;
+  const enThemeLogo = theme === "light" ? settings?.logo_dark_url : settings?.logo_light_url;
+  const arThemeLogo = theme === "light" ? settings?.logo_dark_ar_url : settings?.logo_light_ar_url;
+  // Arabic site prefers the Arabic logo, falling back to the English one when not set.
+  const themeLogo = (isArabic ? arThemeLogo : enThemeLogo) || enThemeLogo;
   const preferredLogo = themeLogo || settings?.logo_url || defaultLogo;
   const [logoSrc, setLogoSrc] = useState(preferredLogo);
 

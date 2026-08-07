@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import type { MenuItemData } from "@/lib/customerAPI";
 import type { DietaryTag } from "../types/filters";
 import { useTranslation } from "react-i18next";
-import { getCountryCodeForItem } from "@/lib/dataConverters";
+import { getCountryCodeForItem, isVariablePrice } from "@/lib/dataConverters";
 import { AppIcon, getDietaryIconName } from "./AppIcon";
 import { IconWithTooltip } from "./IconWithTooltip";
 
@@ -168,10 +168,18 @@ export const DishItem: React.FC<Props> = ({ item, onOpen, index, resolvedCountry
           <div className="dish-item__title-row">
             <h3 className="dish-item__heading">{itemName}</h3>
             <div className="dish-item__price-wrap">
-              <AppIcon name="price" size={14} strokeWidth={2} className="dish-item__price-icon" aria-hidden />
-              <span className="price dish-item__price">
-                {typeof item.price === "string" ? item.price : item.price.toFixed(0)}
-              </span>
+              {isVariablePrice(item.price) ? (
+                <span className="price dish-item__price dish-item__price--variable">
+                  {t("asPerSize")}
+                </span>
+              ) : (
+                <>
+                  <AppIcon name="price" size={14} strokeWidth={2} className="dish-item__price-icon" aria-hidden />
+                  <span className="price dish-item__price">
+                    {typeof item.price === "string" ? item.price : item.price.toFixed(0)}
+                  </span>
+                </>
+              )}
             </div>
           </div>
           {visibleTagKeys.length > 0 && (

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { MenuItemData, CategoryData } from "@/lib/customerAPI";
 import { useTranslation } from "react-i18next";
-import { getCountryCodeForItem, isVegetarianSection, countryCodeToFlag } from "@/lib/dataConverters";
+import { getCountryCodeForItem, isVegetarianSection, countryCodeToFlag, isVariablePrice } from "@/lib/dataConverters";
 import { AppIcon, getDietaryIconName } from "./AppIcon";
 import type { DietaryTag } from "../types/filters";
 
@@ -198,10 +198,18 @@ export const DishModal: React.FC<Props> = ({ item, onClose, category }) => {
                     )}
                   </div>
                   <div className="dish-modal__price-wrap">
-                    <AppIcon name="price" size={18} strokeWidth={2} aria-hidden />
-                    <span className="price dish-modal__price">
-                      {typeof item.price === "string" ? item.price : item.price.toFixed(0)}
-                    </span>
+                    {isVariablePrice(item.price) ? (
+                      <span className="price dish-modal__price dish-modal__price--variable">
+                        {t("asPerSize")}
+                      </span>
+                    ) : (
+                      <>
+                        <AppIcon name="price" size={18} strokeWidth={2} aria-hidden />
+                        <span className="price dish-modal__price">
+                          {typeof item.price === "string" ? item.price : item.price.toFixed(0)}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="dish-modal__attributes">
@@ -332,8 +340,14 @@ export const DishModal: React.FC<Props> = ({ item, onClose, category }) => {
                 <div className="dish-modal__detail-row dish-modal__detail-row--price">
                   <span className="dish-modal__detail-label">{t("detailPrice")}</span>
                   <span className="dish-modal__detail-value dish-modal__price-wrap">
-                    <AppIcon name="price" size={18} strokeWidth={2} aria-hidden />
-                    <span className="price">{typeof item.price === "string" ? item.price : item.price.toFixed(0)}</span>
+                    {isVariablePrice(item.price) ? (
+                      <span className="price dish-modal__price--variable">{t("asPerSize")}</span>
+                    ) : (
+                      <>
+                        <AppIcon name="price" size={18} strokeWidth={2} aria-hidden />
+                        <span className="price">{typeof item.price === "string" ? item.price : item.price.toFixed(0)}</span>
+                      </>
+                    )}
                   </span>
                 </div>
               </div>

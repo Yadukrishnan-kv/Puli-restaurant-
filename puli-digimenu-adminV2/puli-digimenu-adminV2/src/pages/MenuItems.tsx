@@ -100,7 +100,7 @@ function SortableMenuItemRow({
       <td className="py-3 text-[var(--color-text-secondary)]">{categoryName}</td>
       <td className="py-3 text-[var(--color-text-secondary)]">{subcategoryName}</td>
       <td className="py-3 text-[var(--color-text-secondary)]">{countryName}</td>
-      <td className="py-3 font-mono text-[var(--color-text-secondary)]">{item.price}</td>
+      <td className="py-3 font-mono text-[var(--color-text-secondary)]">{Number(item.price) > 0 ? item.price : 'As Per Size'}</td>
       <td className="py-3">
         <div className="flex gap-1">
           {item.chef_special && (
@@ -810,7 +810,8 @@ export function MenuItemsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-sm font-medium">Price</label>
-              <input type="number" step="0.01" {...register('price')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
+              <input type="number" step="0.01" min="0" placeholder="Leave blank or 0 for 'As Per Size'" {...register('price')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
+              <p className="mt-1 text-xs text-[var(--color-text-secondary)]">Enter 0 (or leave blank) to show &ldquo;As Per Size&rdquo; on the menu.</p>
               {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
             </div>
             <div>

@@ -94,9 +94,14 @@ export interface Settings {
   restaurant_name_ar?: string
   address_en?: string
   address_ar?: string
+  phone?: string
+  telephone?: string
+  email?: string
   logo_url: string
   logo_dark_url?: string
   logo_light_url?: string
+  logo_dark_ar_url?: string
+  logo_light_ar_url?: string
   favicon_url: string
   theme_mode: 'light' | 'dark' | 'system'
 }

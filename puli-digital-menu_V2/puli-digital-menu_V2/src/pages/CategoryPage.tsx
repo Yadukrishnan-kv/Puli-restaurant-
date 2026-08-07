@@ -19,6 +19,7 @@ type SubCategoryPayload = {
   name_ar?: string;
   category_id?: string;
   order?: number;
+  visible?: boolean;
 };
 
 type CountryPayload = {
@@ -366,6 +367,7 @@ export const CategoryPage: React.FC = () => {
           const id = (entry._id || entry.id || "").trim();
           const name = ((isArabic ? entry.name_ar : entry.name_en) || entry.name_en || entry.name_ar || "").trim();
           if (!id || !name) return;
+          if (entry.visible === false) return;
 
           if (!category || !entry.category_id || String(entry.category_id) === String(category._id)) {
             mapping.set(id, name);

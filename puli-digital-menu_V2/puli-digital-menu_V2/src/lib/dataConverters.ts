@@ -41,6 +41,16 @@ export function getCountryCodeForItem(item: MenuItemData): string | undefined {
 }
 
 /**
+ * A dish has a variable ("As Per Size") price when no positive price is set.
+ * Backend stores such items with price 0; blank/invalid values are treated the same.
+ */
+export function isVariablePrice(price?: number | string | null): boolean {
+  if (price === null || price === undefined || price === '') return true
+  const num = typeof price === 'number' ? price : parseFloat(String(price).replace(/[^0-9.]/g, ''))
+  return !Number.isFinite(num) || num <= 0
+}
+
+/**
  * Check if item is from vegetarian section
  */
 export function isVegetarianSection(sectionName?: string): boolean {
