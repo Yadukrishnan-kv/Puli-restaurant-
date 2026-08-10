@@ -420,9 +420,32 @@ app.post('/api/subcategories', authMiddleware, async (req, res) => {
 
 app.put('/api/subcategories/:id', authMiddleware, async (req, res) => {
   try {
+    // Capture the previous parent category so we can detect a change.
+    const existing = await SubCategory.findById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Subcategory not found' });
+    }
+    const previousCategoryId = existing.category_id ? existing.category_id.toString() : null;
+
     const subcategory = await SubCategory.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
-    await logActivity(req, req.user.email, 'subcategories', 'update', subcategory._id, req.body);
-    res.json(toPlain(subcategory));
+    const newCategoryId = subcategory.category_id ? subcategory.category_id.toString() : null;
+
+    // If the subcategory was moved to a different parent category, keep every
+    // menu item that belongs to this subcategory in sync with the new parent.
+    let movedItems = 0;
+    if (newCategoryId && previousCategoryId !== newCategoryId) {
+      const result = await MenuItem.updateMany(
+        { subcategory_id: subcategory._id },
+        { $set: { category_id: subcategory.category_id } }
+      );
+      movedItems = result.modifiedCount ?? result.nModified ?? 0;
+    }
+
+    await logActivity(req, req.user.email, 'subcategories', 'update', subcategory._id, {
+      ...req.body,
+      moved_menu_items: movedItems,
+    });
+    res.json({ ...toPlain(subcategory), moved_menu_items: movedItems });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -767,6 +790,13 @@ app.put('/api/story/:id', authMiddleware, async (req, res) => {
 
 // ============ ADMIN ROUTES - SETTINGS ============
 
+// Default restaurant opening hours used to seed/backfill settings.
+const DEFAULT_OPENING_HOURS = [
+  { days: 'SATURDAY TO WEDNESDAY', meals: ['Restaurant: 11.30am to 11.30pm'] },
+  { days: 'THURSDAY & FRIDAY', meals: ['Restaurant: 11.30am to 12.00am'] },
+  { days: 'BREAKFAST (FRIDAY & SATURDAY)', meals: ['8.00am to 11.00am'] },
+];
+
 app.get('/api/settings', async (req, res) => {
   try {
     let settings = await Settings.findOne();
@@ -781,6 +811,7 @@ app.get('/api/settings', async (req, res) => {
         logo_light_url: '',
         favicon_url: '/assets/Favicon.svg',
         theme_mode: 'light',
+        opening_hours: DEFAULT_OPENING_HOURS,
       });
     }
 
@@ -790,6 +821,12 @@ app.get('/api/settings', async (req, res) => {
     if (needsLogoBackfill) {
       settings.logo_dark_url = settings.logo_dark_url ?? '/assets/Logo_EN.svg';
       settings.logo_light_url = settings.logo_light_url ?? '/assets/Logo_lgt_EN.svg';
+      await settings.save();
+    }
+
+    // Backfill opening hours for records created before this field existed.
+    if (!Array.isArray(settings.opening_hours) || settings.opening_hours.length === 0) {
+      settings.opening_hours = DEFAULT_OPENING_HOURS;
       await settings.save();
     }
 
@@ -809,6 +846,10 @@ app.get('/api/settings', async (req, res) => {
       logo_light_ar_url: makeAbsoluteUrl(req, settings.logo_light_ar_url),
       favicon_url: makeAbsoluteUrl(req, settings.favicon_url),
       theme_mode: settings.theme_mode,
+      opening_hours: (settings.opening_hours || []).map((g) => ({
+        days: g.days,
+        meals: g.meals || [],
+      })),
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

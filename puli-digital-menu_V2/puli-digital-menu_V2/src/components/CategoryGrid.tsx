@@ -40,6 +40,17 @@ export const CategoryGrid: React.FC = () => {
   const email = settings?.email || "info@puli.rest";
   const telHref = (value: string) => `tel:${value.replace(/[^\d+]/g, "")}`;
 
+  // Opening hours come from admin settings; fall back to the standard timings if unset.
+  const defaultOpeningHours = [
+    { days: "SATURDAY TO WEDNESDAY", meals: ["Restaurant: 11.30am to 11.30pm"] },
+    { days: "THURSDAY & FRIDAY", meals: ["Restaurant: 11.30am to 12.00am"] },
+    { days: "BREAKFAST (FRIDAY & SATURDAY)", meals: ["8.00am to 11.00am"] },
+  ];
+  const openingHours =
+    settings?.opening_hours && settings.opening_hours.length > 0
+      ? settings.opening_hours
+      : defaultOpeningHours;
+
   const mainCategories = categories.filter((c) => c.category_id !== 'special' && c.category_id !== 'festive');
   const specialCategories = categories.filter((c) => c.category_id === 'special');
   const festiveCategories = categories.filter((c) => c.category_id === 'festive');
@@ -133,25 +144,7 @@ export const CategoryGrid: React.FC = () => {
               >
                 <div style={{ fontWeight: 600 }}>{t("openingHours")}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                  {[
-                    {
-                      days: "FRIDAY & SATURDAY",
-                      meals: [
-                        "Breakfast: 7.00am to 10.00am",
-                        "Lunch: 11.30am to 3.30pm",
-                        "Chaat: 4.00pm to 6.00pm",
-                        "Dinner: 6.00pm to 11.45pm",
-                      ],
-                    },
-                    {
-                      days: "SUNDAY TO THURSDAY",
-                      meals: [
-                        "Lunch: 11.30am to 3.30pm",
-                        "Chaat: 4.00pm to 6.00pm",
-                        "Dinner: 6.00pm to 11.45pm",
-                      ],
-                    },
-                  ].map(({ days, meals }) => (
+                  {openingHours.map(({ days, meals }) => (
                     <div key={days} style={{ display: "flex", flexDirection: "column", gap: "0.1rem" }}>
                       <span style={{ fontWeight: 600 }}>{days}</span>
                       {meals.map((meal) => (

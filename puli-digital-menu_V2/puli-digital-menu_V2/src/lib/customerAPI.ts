@@ -83,6 +83,11 @@ export interface StoryData {
   background_image?: string
 }
 
+export interface OpeningHoursGroup {
+  days: string
+  meals: string[]
+}
+
 export interface SettingsData {
   id: string
   restaurant_name: string
@@ -99,6 +104,7 @@ export interface SettingsData {
   logo_light_ar_url?: string
   favicon_url?: string
   theme_mode?: string
+  opening_hours?: OpeningHoursGroup[]
 }
 
 export interface CustomerRecord {
@@ -284,9 +290,9 @@ class CustomerAPIClient {
   /**
    * Get app settings (logo / menu title / theme)
    */
-  async getSettings(): Promise<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; logo_dark_ar_url?: string; logo_light_ar_url?: string; favicon_url?: string; theme_mode?: string }> {
+  async getSettings(): Promise<SettingsData> {
     const response = await this.client.get<unknown>('/api/settings')
-    const settings = extractObject<{ id: string; restaurant_name: string; restaurant_name_ar?: string; address_en?: string; address_ar?: string; logo_url?: string; logo_dark_url?: string; logo_light_url?: string; logo_dark_ar_url?: string; logo_light_ar_url?: string; favicon_url?: string; theme_mode?: string }>(response.data)
+    const settings = extractObject<SettingsData>(response.data)
 
     return {
       ...settings,

@@ -1,11 +1,22 @@
 const mongoose = require('mongoose');
 
+// A single opening-hours group, e.g. { days: "THURSDAY & FRIDAY", meals: ["Restaurant: 11.30am to 12.00am"] }
+const OpeningHoursGroupSchema = new mongoose.Schema(
+  {
+    days: String,
+    meals: [String],
+  },
+  { _id: false }
+);
+
 const SettingsSchema = new mongoose.Schema(
   {
     restaurant_name: String,
     restaurant_name_ar: String,
     address_en: String,
     address_ar: String,
+    // Opening-hours groups shown in the customer footer
+    opening_hours: [OpeningHoursGroupSchema],
     // Contact details shown in the customer footer
     phone: String,      // mobile
     telephone: String,  // landline
