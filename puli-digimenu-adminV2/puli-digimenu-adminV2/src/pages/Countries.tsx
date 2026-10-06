@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2, Plus, Search } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -38,6 +38,13 @@ export function CountriesPage() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Country | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredCountries = countries.filter((c) => {
+    if (!searchQuery) return true
+    const q = searchQuery.trim().toLowerCase()
+    return c.name_en.toLowerCase().includes(q) || c.name_ar.toLowerCase().includes(q)
+  })
 
   const {
     register,
@@ -121,9 +128,22 @@ export function CountriesPage() {
         }
       />
       <Card className="mt-6">
-        {countries.length === 0 ? (
+        <div className="mb-4 flex gap-4">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search countries by name..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 pl-9 pr-3 text-[var(--color-text-primary)]"
+            />
+          </div>
+        </div>
+        {filteredCountries.length === 0 ? (
           <p className="py-8 text-center text-[var(--color-text-secondary)]">No countries yet.</p>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)]">
@@ -135,7 +155,7 @@ export function CountriesPage() {
               </tr>
             </thead>
             <tbody>
-              {countries.map((c) => (
+              {filteredCountries.map((c) => (
                 <tr key={c.id} className="border-b border-[var(--color-border)]">
                   <td className="py-2">
                     {c.flag_image ? (
@@ -159,6 +179,7 @@ export function CountriesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Card>
 

@@ -74,7 +74,7 @@ export function Dashboard() {
         title="Dashboard"
         subtitle="Overview of your menu content"
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" to="/categories">
               <Plus className="mr-2 h-4 w-4" />
               Add category

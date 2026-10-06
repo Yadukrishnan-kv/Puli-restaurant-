@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Pencil, Trash2, Plus } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Plus, Search } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -110,6 +110,7 @@ export function SubCategoriesPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SubCategory | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   const {
     register,
@@ -214,9 +215,9 @@ export function SubCategoriesPage() {
     }
   }
 
-  const filteredSubs = filterCategory
-    ? subcategories.filter((s) => s.category_id === filterCategory)
-    : subcategories
+  const filteredSubs = subcategories
+    .filter((s) => (filterCategory ? s.category_id === filterCategory : true))
+    .filter((s) => (searchQuery ? s.name_en.toLowerCase().includes(searchQuery.trim().toLowerCase()) : true))
   const sortedSubs = [...filteredSubs].sort((a, b) => {
     if (a.category_id !== b.category_id) return 0
     return a.order - b.order
@@ -236,7 +237,17 @@ export function SubCategoriesPage() {
       />
 
       <Card className="mt-6">
-        <div className="mb-4 flex gap-4">
+        <div className="mb-4 flex flex-wrap gap-4">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search sub-categories by name..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 pl-9 pr-3 text-[var(--color-text-primary)]"
+            />
+          </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
@@ -252,34 +263,36 @@ export function SubCategoriesPage() {
           <p className="py-8 text-center text-[var(--color-text-secondary)]">No sub-categories yet.</p>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)]">
-                  <th className="w-10 py-3"></th>
-                  <th className="py-3">Category</th>
-                  <th className="py-3">Name (EN)</th>
-                  <th className="py-3">Name (AR)</th>
-                  <th className="py-3">Visibility</th>
-                  <th className="py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <SortableContext items={sortedSubs.map((s) => s.id)}>
-                  {sortedSubs.map((sc) => {
-                    const cat = categories.find((c) => c.id === sc.category_id)
-                    return (
-                      <SortableSubCategoryRow
-                        key={sc.id}
-                        sc={sc}
-                        categoryName={cat?.name_en ?? '–'}
-                        onEdit={openEdit}
-                        onDelete={onDelete}
-                      />
-                    )
-                  })}
-                </SortableContext>
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-sm text-[var(--color-text-secondary)]">
+                    <th className="w-10 py-3"></th>
+                    <th className="py-3">Category</th>
+                    <th className="py-3">Name (EN)</th>
+                    <th className="py-3">Name (AR)</th>
+                    <th className="py-3">Visibility</th>
+                    <th className="py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <SortableContext items={sortedSubs.map((s) => s.id)}>
+                    {sortedSubs.map((sc) => {
+                      const cat = categories.find((c) => c.id === sc.category_id)
+                      return (
+                        <SortableSubCategoryRow
+                          key={sc.id}
+                          sc={sc}
+                          categoryName={cat?.name_en ?? '–'}
+                          onEdit={openEdit}
+                          onDelete={onDelete}
+                        />
+                      )
+                    })}
+                  </SortableContext>
+                </tbody>
+              </table>
+            </div>
           </DndContext>
         )}
       </Card>

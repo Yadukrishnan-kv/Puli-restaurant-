@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Pencil, Trash2, Plus } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Plus, Search } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -146,6 +146,7 @@ export function CategoriesPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
   const [image, setImage] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [newClsNameEn, setNewClsNameEn] = useState('')
   const [newClsNameAr, setNewClsNameAr] = useState('')
 
@@ -283,6 +284,9 @@ export function CategoriesPage() {
   }
 
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order)
+  const displayedCategories = sortedCategories.filter((c) =>
+    searchQuery ? c.name_en.toLowerCase().includes(searchQuery.trim().toLowerCase()) : true
+  )
 
   return (
     <>
@@ -298,36 +302,50 @@ export function CategoriesPage() {
       />
 
       <Card className="mt-8">
-        {sortedCategories.length === 0 ? (
+        <div className="mb-4 flex gap-4">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search categories by name..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 pl-9 pr-3 text-[var(--color-text-primary)]"
+            />
+          </div>
+        </div>
+        {displayedCategories.length === 0 ? (
           <p className="py-8 text-center text-[var(--color-text-secondary)]">No categories yet. Add one to get started.</p>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-text-secondary)]">
-                  <th className="w-10 py-3"></th>
-                  <th className="py-3">Image</th>
-                  <th className="py-3">Name (EN)</th>
-                  <th className="py-3">Name (AR)</th>
-                  <th className="py-3">Section</th>
-                  <th className="py-3">Visibility</th>
-                  <th className="py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <SortableContext items={sortedCategories.map((c) => c.id)}>
-                  {sortedCategories.map((cat) => (
-                    <SortableCategoryRow
-                      key={cat.id}
-                      category={cat}
-                      sectionName={getSectionName(cat.section_id)}
-                      onEdit={openEdit}
-                      onDelete={onDelete}
-                    />
-                  ))}
-                </SortableContext>
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-text-secondary)]">
+                    <th className="w-10 py-3"></th>
+                    <th className="py-3">Image</th>
+                    <th className="py-3">Name (EN)</th>
+                    <th className="py-3">Name (AR)</th>
+                    <th className="py-3">Section</th>
+                    <th className="py-3">Visibility</th>
+                    <th className="py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <SortableContext items={displayedCategories.map((c) => c.id)}>
+                    {displayedCategories.map((cat) => (
+                      <SortableCategoryRow
+                        key={cat.id}
+                        category={cat}
+                        sectionName={getSectionName(cat.section_id)}
+                        onEdit={openEdit}
+                        onDelete={onDelete}
+                      />
+                    ))}
+                  </SortableContext>
+                </tbody>
+              </table>
+            </div>
           </DndContext>
         )}
       </Card>

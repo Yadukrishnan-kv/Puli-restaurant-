@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Pencil, Trash2, Plus, Copy, Eye, EyeOff, Upload } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Plus, Copy, Eye, EyeOff, Upload, Search } from 'lucide-react'
 
 import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
@@ -142,6 +142,7 @@ export function MenuItemsPage() {
   const [editing, setEditing] = useState<MenuItemType | null>(null)
   const [image, setImage] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Import state
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -619,9 +620,9 @@ export function MenuItemsPage() {
     }
   }
 
-  const filteredItems = filterCategory
-    ? menuItems.filter((m) => m.category_id === filterCategory)
-    : menuItems
+  const filteredItems = menuItems
+    .filter((m) => (filterCategory ? m.category_id === filterCategory : true))
+    .filter((m) => (searchQuery ? m.name_en.toLowerCase().includes(searchQuery.trim().toLowerCase()) : true))
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (a.category_id !== b.category_id) return 0
     return a.order - b.order
@@ -687,7 +688,7 @@ export function MenuItemsPage() {
         title="Menu Items"
         subtitle="Manage dishes and their order"
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <input
               ref={fileInputRef}
               type="file"
@@ -717,7 +718,17 @@ export function MenuItemsPage() {
       )}
 
       <Card className="mt-8">
-        <div className="mb-4 flex gap-4">
+        <div className="mb-4 flex flex-wrap gap-4">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search dishes by name..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 pl-9 pr-3 text-[var(--color-text-primary)]"
+            />
+          </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
@@ -735,38 +746,40 @@ export function MenuItemsPage() {
           <p className="py-8 text-center text-[var(--color-text-secondary)]">No dishes yet.</p>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-text-secondary)]">
-                  <th className="w-10 py-3"></th>
-                  <th className="py-3">Image</th>
-                  <th className="py-3">Name</th>
-                  <th className="py-3">Category</th>
-                  <th className="py-3">Sub-category</th>
-                  <th className="py-3">Country</th>
-                  <th className="py-3">Price</th>
-                  <th className="py-3">Badges</th>
-                  <th className="py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <SortableContext items={sortedItems.map((m) => m.id)}>
-                  {sortedItems.map((item) => (
-                    <SortableMenuItemRow
-                      key={item.id}
-                      item={item}
-                      categoryName={getCatName(item.category_id)}
-                      subcategoryName={getSubCategoryName(item.subcategory_id ?? item.classification_id ?? null)}
-                      countryName={getCountryName(item.country_id ?? null)}
-                      onEdit={openEdit}
-                      onDelete={onDelete}
-                      onDuplicate={onDuplicate}
-                      onToggleVisible={onToggleVisible}
-                    />
-                  ))}
-                </SortableContext>
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-text-secondary)]">
+                    <th className="w-10 py-3"></th>
+                    <th className="py-3">Image</th>
+                    <th className="py-3">Name</th>
+                    <th className="py-3">Category</th>
+                    <th className="py-3">Sub-category</th>
+                    <th className="py-3">Country</th>
+                    <th className="py-3">Price</th>
+                    <th className="py-3">Badges</th>
+                    <th className="py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <SortableContext items={sortedItems.map((m) => m.id)}>
+                    {sortedItems.map((item) => (
+                      <SortableMenuItemRow
+                        key={item.id}
+                        item={item}
+                        categoryName={getCatName(item.category_id)}
+                        subcategoryName={getSubCategoryName(item.subcategory_id ?? item.classification_id ?? null)}
+                        countryName={getCountryName(item.country_id ?? null)}
+                        onEdit={openEdit}
+                        onDelete={onDelete}
+                        onDuplicate={onDuplicate}
+                        onToggleVisible={onToggleVisible}
+                      />
+                    ))}
+                  </SortableContext>
+                </tbody>
+              </table>
+            </div>
           </DndContext>
         )}
       </Card>
@@ -786,7 +799,7 @@ export function MenuItemsPage() {
         }
       >
         <form id="dish-form" onSubmit={handleSubmit(onSave)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Name (EN)</label>
               <input {...register('name_en')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
@@ -797,7 +810,7 @@ export function MenuItemsPage() {
               <input {...register('name_ar')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Description (EN)</label>
               <textarea {...register('description_en')} rows={2} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
@@ -807,7 +820,7 @@ export function MenuItemsPage() {
               <textarea {...register('description_ar')} rows={2} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Price</label>
               <input type="number" step="0.01" min="0" placeholder="Leave blank or 0 for 'As Per Size'" {...register('price')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />
@@ -871,7 +884,7 @@ export function MenuItemsPage() {
             <label className="mb-1 block text-sm font-medium">Dish image</label>
             <ImageUpload value={image} onChange={setImage} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Tags (comma-separated)</label>
               <input {...register('tags')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" placeholder="e.g. Spicy, Vegan" />
@@ -905,7 +918,7 @@ export function MenuItemsPage() {
           </div>
           <div className="border-t border-[var(--color-border)] pt-4">
             <p className="mb-2 text-sm font-medium">Availability (optional)</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm">Available from (time)</label>
                 <input type="time" {...register('available_from')} className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-primary)]" />

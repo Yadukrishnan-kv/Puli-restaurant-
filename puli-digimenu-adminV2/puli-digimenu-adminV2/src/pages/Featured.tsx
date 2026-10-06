@@ -39,7 +39,7 @@ export function FeaturedPage() {
       />
 
       <Card className="mt-8">
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 flex flex-wrap gap-2">
           {(['chef_special', 'popular', 'recommended'] as const).map((key) => (
             <button
               key={key}
